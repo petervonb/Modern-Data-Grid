@@ -9,3 +9,22 @@
     padding-right: 0px !important;
 
 }
+
+/* Keep single-selection radio controls perfectly circular in DataTable cells. */
+.p-datatable .p-radiobutton {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.p-datatable .p-radiobutton .p-radiobutton-box {
+    width: 1.25rem;
+    height: 1.25rem;
+    border-radius: 50%;
+}
+
+.p-datatable .p-radiobutton .p-radiobutton-icon {
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+}
