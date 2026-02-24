@@ -425,11 +425,17 @@ class DataGrid extends Component<DataGridProps, DataGridState> {
         if (!gridIsEnabled) {
             return;
         }
-        const newSelectedRecordIds = e.value.map((record: any) => record.id);
-        this.props.context.parameters.DataSource.setSelectedRecordIds(newSelectedRecordIds)
+
+        const rawSelectionMode = this.props.context.parameters.SelectionMode?.raw;
+        const isSingleSelection = rawSelectionMode === "single";
+        const selectedRecords = !e.value ? [] : Array.isArray(e.value) ? e.value : [e.value];
+        const normalizedSelectedRecords = isSingleSelection ? selectedRecords.slice(0, 1) : selectedRecords;
+        const newSelectedRecordIds = normalizedSelectedRecords.map((record: any) => record.id);
+
+        this.props.context.parameters.DataSource.setSelectedRecordIds(newSelectedRecordIds);
         this.setState({
             selectedRecordIds: newSelectedRecordIds,
-            selectedRecords: e.value,
+            selectedRecords: normalizedSelectedRecords,
         }, () => {
             this.forceUpdate();
         });
@@ -503,10 +509,14 @@ class DataGrid extends Component<DataGridProps, DataGridState> {
         const displayPagination = context.parameters.DisplayPagination?.raw ?? true;
         const emptyMessage = context.parameters.EmptyMessage?.raw ?? "No records found.";
         const filterDisplayType = "menu";
-        const allowedSelectionModes: Array<"multiple" | "checkbox"> = ["multiple", "checkbox"];
+        const allowedSelectionModes: Array<"single" | "multiple" | "checkbox"> = ["single", "multiple", "checkbox"];
         const selectionMode = (context.parameters.SelectionMode?.raw && allowedSelectionModes.includes(context.parameters.SelectionMode?.raw as any))
-            ? (context.parameters.SelectionMode?.raw as "multiple" | "checkbox")
+            ? (context.parameters.SelectionMode?.raw as "single" | "multiple" | "checkbox")
             : "multiple";
+        const isSingleSelection = selectionMode === "single";
+        const selectedRows = records.filter(record => selectedRecordIds.includes(record.id));
+        const selectionValue = isSingleSelection ? (selectedRows[0] ?? null) : selectedRows;
+        const columnSelectionMode = isSingleSelection ? "single" : "multiple";
         const allowSorting = context.parameters.AllowSorting?.raw ?? false;
         const allowFiltering = context.parameters.AllowFiltering?.raw ?? false;
         const rowsPerPageOptions = [5, 15, 25];
@@ -626,8 +636,8 @@ class DataGrid extends Component<DataGridProps, DataGridState> {
                         }
                     }}
                     dataKey="id"
-                    selectionMode={selectionMode}
-                    selection={records.filter(record => selectedRecordIds.includes(record.id))}
+                    selectionMode={selectionMode as any}
+                    selection={selectionValue as any}
                     onSelectionChange={this.onSelectionChange}
                     filters={filters}
                     filterDisplay={filterDisplayType as "menu" | "row"}
@@ -639,7 +649,7 @@ class DataGrid extends Component<DataGridProps, DataGridState> {
                     style={{ width: '100%', minWidth: '0' }}
 
                 >
-                    <Column selectionMode="multiple" headerStyle={{ width: '3rem' }}></Column>
+                    <Column selectionMode={columnSelectionMode} headerStyle={{ width: '3rem' }}></Column>
                     {context.parameters.DataSource.columns.map((col, index) => (
                         <Column
                             key={index}

@@ -56,5 +56,5 @@ To ensure the custom component runs properly, you must first enable code compone
 | `allowSorting`     | `true`, `false`                               |
 | `defaultRows`      | Numeric value (e.g., `10`, `25`, `50`)        |
 | `emptyMessage`     | Custom text string                            |
-| `selectionMode`    | `multiple`, `checkbox`                        |
+| `selectionMode`    | `single`, `multiple`, `checkbox`              |
 | `filterDisplayType`| `menu`, `row`                                 |
